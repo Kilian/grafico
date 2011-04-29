@@ -159,7 +159,7 @@ Grafico.Normaliser = Class.create({
     } else {
       p = Math.pow(10, exp);
     }
-    f = x / p
+    f = x / p;
 
     if (round) {
       if (f < 1.5) {
