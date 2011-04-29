@@ -221,7 +221,7 @@ Grafico.BaseGraph = Class.create(Grafico.Base, {
       padding_top:            20,
       draw_axis:              true,
       datalabels:             '',    // interactive, filled with same # of elements as graph items.
-	  drawlegend:             true,
+	  drawlegend:             false,
       hover_color:            '',    // hover color if there are datalabels
       hover_radius:           15,    // pixels minimum at the top and at the bottom of a line for hover activation
       watermark:              false,
