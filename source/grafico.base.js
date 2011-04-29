@@ -221,6 +221,7 @@ Grafico.BaseGraph = Class.create(Grafico.Base, {
       padding_top:            20,
       draw_axis:              true,
       datalabels:             '',    // interactive, filled with same # of elements as graph items.
+	  drawlegend:             true,
       hover_color:            '',    // hover color if there are datalabels
       hover_radius:           15,    // pixels minimum at the top and at the bottom of a line for hover activation
       watermark:              false,
@@ -464,7 +465,9 @@ Grafico.BaseGraph = Class.create(Grafico.Base, {
     if (!this.options.watermark) {
       this.drawLinesInit(this);
     }
-
+	if (this.options.drawlegend){
+		this.drawLegend(this);
+	}
     if (this.options.draw_axis) {
       this.drawAxis();
     }
@@ -479,6 +482,7 @@ Grafico.BaseGraph = Class.create(Grafico.Base, {
   },
 
   drawLinesInit: function (thisgraph) {
+	
     thisgraph.data_sets.each(function (data, index) {
       thisgraph.drawLines(data[0], thisgraph.options.colors[data[0]], thisgraph.normaliseData(data[1]), thisgraph.options.datalabels[data[0]], thisgraph.element, index);
     }.bind(thisgraph));
@@ -534,7 +538,50 @@ Grafico.BaseGraph = Class.create(Grafico.Base, {
       }
     }
   },
-
+  drawLegend: function (thisgraph){
+	var linelength = 20;
+	var textpadding = 2;
+	var textheight = 12;
+	var textwidth = 8;
+	var textspacer = textheight+textpadding;
+	var lWidth = (thisgraph.options.datalabels[thisgraph.data_sets.keys().max()].length*textwidth) + (4*textwidth) + linelength;
+	var lHeight = (thisgraph.data_sets.keys().length * (textheight + textpadding)) + 2*textheight; 
+	var xroot = this.graph_width - lWidth;
+	var yroot = this.graph_height - lHeight;
+	
+	var legendRect = this.paper.rect(xroot,yroot,lWidth,lHeight).attr({
+		fill: "white",
+		opacity: 0.9
+	});
+	var legendTitle = "Legend:";
+	var legendText = this.paper.text((xroot+(3*textwidth)),(yroot+textheight), legendTitle);
+	var legendSet = this.paper.set(legendRect, legendText);
+	for (var i=0; i < thisgraph.data_sets.keys().length; i++){
+		var thiscolor = thisgraph.options.colors[thisgraph.data_sets.keys()[i]];
+		var path = this.paper.path().attr({stroke: thiscolor, fill: thiscolor, 'stroke-width': '3px'});
+		path.moveTo(xroot+textwidth,yroot+(2*textspacer)+(i*textspacer));
+        path.lineTo(xroot+textwidth+linelength,yroot+(2*textspacer)+(i*textspacer));
+		var thislabel = thisgraph.options.datalabels[thisgraph.data_sets.keys()[i]];
+		var labeltext = this.paper.text(xroot+(thislabel.length)+(3*linelength),yroot+(2*textspacer)+(i*textspacer),thislabel);
+		legendSet.push(path);
+		legendSet.push(labeltext);
+	};
+	var start = function () {
+		// storing original coordinates
+		this.oBB = this.getBBox();
+		legendRect.attr({opacity: 0.3});
+	},
+	move = function (dx, dy) {
+		// move will be called with dx and dy
+		var bb = this.getBBox();
+		legendSet.translate(this.oBB.x - bb.x + dx, this.oBB.y - bb.y + dy);
+	},
+	up = function () {
+		// restoring state
+		legendRect.attr({opacity: 0.9});
+	};
+	legendSet.drag(move, start, up);
+  },
   drawLines: function (label, color, data, datalabel, element, graphindex) {
     var coords = this.calculateCoords(data),
         y_offset = (this.graph_height + this.y_padding_top),
