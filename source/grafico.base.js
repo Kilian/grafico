@@ -463,7 +463,11 @@ Grafico.BaseGraph = Class.create(Grafico.Base, {
     if (!this.options.watermark) {
       this.drawLinesInit(this);
     }
-
+    
+    if (this.options.drawlegend){
+      this.drawLegend(this);
+    }
+    
     if (this.options.draw_axis) {
       this.drawAxis();
     }
@@ -533,7 +537,9 @@ Grafico.BaseGraph = Class.create(Grafico.Base, {
       }
     }
   },
-
+  drawLegend: function () {
+	    /* Define in child classes */
+  },
   drawLines: function (label, color, data, datalabel, element, graphindex) {
     var coords = this.calculateCoords(data),
         y_offset = (this.graph_height + this.y_padding_top),
