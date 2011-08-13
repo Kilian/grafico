@@ -15,7 +15,9 @@ Grafico.LineGraph = Class.create(Grafico.BaseGraph, {
       stroke_width: 5,
       drawlegend: false,
       curve_amount: 10,
-      legend_title: 'Legend:'
+      legend_title: 'Legend:',
+      legend_positon_x: 'right',
+      legend_positon_y: 'bottom'
     };
   },
 
@@ -35,12 +37,15 @@ Grafico.LineGraph = Class.create(Grafico.BaseGraph, {
 		var textheight = 12;
 		var textwidth = 8;
 		var textspacer = textheight+textpadding;
-		var textgap = 40
-		var lWidth = (thisgraph.options.datalabels[thisgraph.data_sets.keys().max()].length*textwidth) + (4*textwidth) + linelength;
-		var lHeight = (thisgraph.data_sets.keys().length * (textheight + textpadding)) + 2*textheight; 
-		var xroot = this.graph_width - lWidth;
-		var yroot = this.graph_height - lHeight;
+		var textgap = 40;
+		var xroot;
+		var yroot;
 		
+		var lWidth = (thisgraph.options.datalabels[thisgraph.data_sets.keys().max()].length*textwidth) + (4*textwidth) + linelength;
+		var lHeight = (thisgraph.data_sets.keys().length * (textheight + textpadding)) + 2*textheight;
+		(thisgraph.options.legend_positon_x == 'left')  ?  xroot = parseInt(this.x_padding_left, 10) * 1.5 : xroot = this.graph_width - lWidth;	   
+		(thisgraph.options.legend_positon_y == 'top') ? yroot = this.y_padding_bottom : yroot = this.graph_height - lHeight;
+
 		var legendRect = this.paper.rect(xroot,yroot,lWidth,lHeight).attr({
 			fill: "white",
 			opacity: 0.9
