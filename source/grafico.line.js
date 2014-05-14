@@ -13,7 +13,11 @@ Grafico.LineGraph = Class.create(Grafico.BaseGraph, {
       line: true,
       start_at_zero: true,
       stroke_width: 5,
-      curve_amount: 10
+      drawlegend: false,
+      curve_amount: 10,
+      legend_title: 'Legend:',
+      legend_positon_x: 'right',
+      legend_positon_y: 'bottom'
     };
   },
 
@@ -26,8 +30,56 @@ Grafico.LineGraph = Class.create(Grafico.BaseGraph, {
 
   startPlot: function (cursor, x, y, color) {
     cursor.moveTo(x, y);
-  },
+  },  
+  drawLegend: function (thisgraph){
+		var linelength = 20;
+		var textpadding = 2;
+		var textheight = 12;
+		var textwidth = 8;
+		var textspacer = textheight+textpadding;
+		var textgap = 40;
+		var xroot;
+		var yroot;
+		
+		var lWidth = (thisgraph.options.datalabels[thisgraph.data_sets.keys().max()].length*textwidth) + (4*textwidth) + linelength;
+		var lHeight = (thisgraph.data_sets.keys().length * (textheight + textpadding)) + 2*textheight;
+		(thisgraph.options.legend_positon_x == 'left')  ?  xroot = parseInt(this.x_padding_left, 10) * 1.5 : xroot = this.graph_width - lWidth;	   
+		(thisgraph.options.legend_positon_y == 'top') ? yroot = this.y_padding_bottom : yroot = this.graph_height - lHeight;
 
+		var legendRect = this.paper.rect(xroot,yroot,lWidth,lHeight).attr({
+			fill: "white",
+			opacity: 0.9
+		});
+		var legendTitle = thisgraph.options.legend_title;
+		var legendText = this.paper.text((xroot+(3*textwidth)),(yroot+textheight), legendTitle);
+		var legendSet = this.paper.set(legendRect, legendText);
+		for (var i=0; i < thisgraph.data_sets.keys().length; i++){
+			var thiscolor = thisgraph.options.colors[thisgraph.data_sets.keys()[i]];
+			var path = this.paper.path().attr({stroke: thiscolor, fill: thiscolor, 'stroke-width': '3px'});
+			path.moveTo(xroot+textwidth,yroot+(2*textspacer)+(i*textspacer));
+	        path.lineTo(xroot+textwidth+linelength,yroot+(2*textspacer)+(i*textspacer));
+			var thislabel = thisgraph.options.datalabels[thisgraph.data_sets.keys()[i]];
+
+			var labeltext = this.paper.text(xroot+textgap,yroot+(2*textspacer)+(i*textspacer),thislabel).attr({'text-anchor': 'start'});
+			legendSet.push(path);
+			legendSet.push(labeltext);
+		};
+		var start = function () {
+			// storing original coordinates
+			this.oBB = this.getBBox();
+			legendRect.attr({opacity: 0.3});
+		},
+		move = function (dx, dy) {
+			// move will be called with dx and dy
+			var bb = this.getBBox();
+			legendSet.translate(this.oBB.x - bb.x + dx, this.oBB.y - bb.y + dy);
+		},
+		up = function () {
+			// restoring state
+			legendRect.attr({opacity: 0.9});
+		};
+		legendSet.drag(move, start, up);
+  },  
   drawPlot: function (index, cursor, x, y, color, coords, datalabel, element, graphindex) {
     if (index === 0) {
       return this.startPlot(cursor, x - 0.5, y, color);
